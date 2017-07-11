@@ -17,7 +17,7 @@ class Plugin {
 
 	public static function getHooks() {
 		return [
-			//'system.settings' => [__CLASS__, 'getSettings'],
+			'system.settings' => [__CLASS__, 'getSettings'],
 			//'ui.menu' => [__CLASS__, 'getMenu'],
 		];
 	}
@@ -41,8 +41,11 @@ class Plugin {
 
 	public static function getSettings(GenericEvent $event) {
 		$settings = $event->getSubject();
-		$settings->add_text_setting('General', 'FraudRecord', 'abuse_imap_user', 'FraudRecord IMAP User:', 'FraudRecord IMAP Username', ABUSE_IMAP_USER);
-		$settings->add_text_setting('General', 'FraudRecord', 'abuse_imap_pass', 'FraudRecord IMAP Pass:', 'FraudRecord IMAP Password', ABUSE_IMAP_PASS);
+		$settings->add_radio_setting('Security & Fraud', 'FraudRecord Fraud Detection', 'fraudrecord_enable', 'Enable FraudRecord', 'Enable FraudRecord', FRAUDRECORD_ENABLE, [true, false], ['Enabled', 'Disabled']);
+		$settings->add_text_setting('Security & Fraud', 'FraudRecord Fraud Detection', 'fraudrecord_api_key', 'API Key', 'API Key', (defined('FRAUDRECORD_API_KEY') ? FRAUDRECORD_API_KEY : ''));
+		$settings->add_text_setting('Security & Fraud', 'FraudRecord Fraud Detection', 'fraudrecord_score_lock', 'Lock if Score > #', 'Lock if Score > #', (defined('FRAUDRECORD_SCORE_LOCK') ? FRAUDRECORD_SCORE_LOCK : ''));
+		$settings->add_text_setting('Security & Fraud', 'FraudRecord Fraud Detection', 'fraudrecord_possible_fraud_score', 'Email Possible Fraud Score > #', 'Email Possible Fraud Score > #', (defined('FRAUDRECORD_POSSIBLE_FRAUD_SCORE') ? FRAUDRECORD_POSSIBLE_FRAUD_SCORE : ''));
+		$settings->add_radio_setting('Security & Fraud', 'FraudRecord Fraud Detection', 'fraudrecord_reporting', 'Enable FraudRecord Reporting', 'Enable FraudRecord Reporting', FRAUDRECORD_REPORTING, [true, false], ['Enabled', 'Disabled']);
 	}
 
 }
