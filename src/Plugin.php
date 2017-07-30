@@ -12,7 +12,7 @@ use Symfony\Component\EventDispatcher\GenericEvent;
 class Plugin {
 
 	public static $name = 'FraudRecord Plugin';
-	public static $description = 'Allows handling of FraudRecord emails and honeypots';
+	public static $description = 'Allows handling of FraudRecord based Fraud Lookups and Fraud Reporting';
 	public static $help = '';
 	public static $type = 'plugin';
 
