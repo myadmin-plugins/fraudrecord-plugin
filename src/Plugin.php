@@ -28,6 +28,7 @@ class Plugin {
 	public static function getHooks() {
 		return [
 			'system.settings' => [__CLASS__, 'getSettings'],
+			'function.requirements' => [__CLASS__, 'getRequirements'],
 			//'ui.menu' => [__CLASS__, 'getMenu'],
 		];
 	}
@@ -49,10 +50,10 @@ class Plugin {
 	 */
 	public static function getRequirements(GenericEvent $event) {
 		$loader = $event->getSubject();
-		$loader->add_requirement('class.FraudRecord', '/../vendor/detain/myadmin-fraudrecord-plugin/src/FraudRecord.php');
-		$loader->add_requirement('deactivate_kcare', '/../vendor/detain/myadmin-fraudrecord-plugin/src/abuse.inc.php');
-		$loader->add_requirement('deactivate_abuse', '/../vendor/detain/myadmin-fraudrecord-plugin/src/abuse.inc.php');
-		$loader->add_requirement('get_abuse_licenses', '/../vendor/detain/myadmin-fraudrecord-plugin/src/abuse.inc.php');
+		$loader->add_requirement('fraudrecord_report', '/../vendor/detain/myadmin-fraudrecord-plugin/src/fraudrecord.inc.php');
+		$loader->add_requirement('fraudrecord_hash', '/../vendor/detain/myadmin-fraudrecord-plugin/src/fraudrecord.inc.php');
+		$loader->add_requirement('update_fraudrecord', '/../vendor/detain/myadmin-fraudrecord-plugin/src/fraudrecord.inc.php');
+		$loader->add_requirement('update_fraudrecord_noaccount', '/../vendor/detain/myadmin-fraudrecord-plugin/src/fraudrecord.inc.php');
 	}
 
 	/**
