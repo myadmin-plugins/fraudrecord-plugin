@@ -50,7 +50,7 @@ class Plugin {
 	 */
 	public static function getRequirements(GenericEvent $event) {
 		$loader = $event->getSubject();
-		$loader->add_requirement('fraudrecord_report', '/../vendor/detain/myadmin-fraudrecord-plugin/src/fraudrecord.inc.php');
+		$loader->add_page_requirement('fraudrecord_report', '/../vendor/detain/myadmin-fraudrecord-plugin/src/fraudrecord.inc.php');
 		$loader->add_requirement('fraudrecord_hash', '/../vendor/detain/myadmin-fraudrecord-plugin/src/fraudrecord.inc.php');
 		$loader->add_requirement('update_fraudrecord', '/../vendor/detain/myadmin-fraudrecord-plugin/src/fraudrecord.inc.php');
 		$loader->add_requirement('update_fraudrecord_noaccount', '/../vendor/detain/myadmin-fraudrecord-plugin/src/fraudrecord.inc.php');
