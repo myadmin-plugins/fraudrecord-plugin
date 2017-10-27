@@ -109,7 +109,7 @@ function update_fraudrecord($custid, $module = 'default', $ip = false) {
 		'_api' => FRAUDRECORD_API_KEY
 	];
 	if ($ip === false)
-		$h['ip'] = trim($GLOBALS['tf']->session->getuser_ip());
+		$h['ip'] = trim(\MyAdmin\Session::get_client_ip());
 	else
 		$h['ip'] = trim($ip);
 	if ($ip != '')
@@ -185,7 +185,7 @@ function update_fraudrecord_noaccount($data) {
 		'_action' => 'query',
 		'_api' => FRAUDRECORD_API_KEY
 	];
-	$h['ip'] = fraudrecord_hash($GLOBALS['tf']->session->getuser_ip());
+	$h['ip'] = fraudrecord_hash(\MyAdmin\Session::get_client_ip());
 	if (!isset($data['country']) || trim($data['country']) == '') {
 		$data['country'] = 'US';
 		$new_data['country'] = 'US';
