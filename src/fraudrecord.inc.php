@@ -6,7 +6,6 @@
  * MaxMind Fields @ http://www.maxmind.com/app/ccv
  * Fields and Descriptions @ http://www.maxmind.com/app/fraud-detection-manual
  * Set your MaxMind Version @ http://www.maxmind.com/app/minfraud_version
-
  * Score Formula from http://www.maxmind.com/app/ccfd_formula
  * The "score" is calculated as follows:
  * score = 	2.5 * isFreeEmail +
@@ -149,7 +148,7 @@ function update_fraudrecord($custid, $module = 'default', $ip = false) {
 		$email = $smarty->fetch('email/admin/fraud.tpl');
 		$new_data['fraudrecord_score'] = trim($matches['score']);
 		$new_data['fraudrecord'] = myadmin_stringify($matches, 'json');
-		myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) fraudrecord Output: " . str_replace("\n", '', var_export($matches, TRUE)), __LINE__, __FILE__);
+		myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) fraudrecord Output: ".str_replace("\n", '', var_export($matches, TRUE)), __LINE__, __FILE__);
 		//myadmin_log('accounts', 'info', "    fraudrecord Score: " . $matches['score'], __LINE__, __FILE__);
 
 		if ($matches['score'] >= FRAUDRECORD_SCORE_LOCK) {
@@ -166,7 +165,7 @@ function update_fraudrecord($custid, $module = 'default', $ip = false) {
 		}
 		$GLOBALS['tf']->accounts->update($custid, $new_data);
 	} else
-		myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) got blank response " . $h, __LINE__, __FILE__);
+		myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) got blank response ".$h, __LINE__, __FILE__);
 	return true;
 }
 
@@ -221,7 +220,7 @@ function update_fraudrecord_noaccount($data) {
 		$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.EMAIL_NEWLINE;
 		$data['fraudrecord_score'] = trim($matches['score']);
 		$data['fraudrecord'] = myadmin_stringify($matches, 'json');
-		myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) fraudrecord Output: " . str_replace("\n", '', var_export($matches, TRUE)), __LINE__, __FILE__);
+		myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) fraudrecord Output: ".str_replace("\n", '', var_export($matches, TRUE)), __LINE__, __FILE__);
 		//myadmin_log('accounts', 'info', "    fraudrecord Score: " . $matches['score'], __LINE__, __FILE__);
 		if ($matches['score'] >= 10.0)
 			$data['status'] = 'locked';
