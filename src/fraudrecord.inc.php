@@ -215,9 +215,9 @@ function update_fraudrecord_noaccount($data) {
 		$smarty->assign('fraudArray', $matches);
 		$email = $smarty->fetch('email/admin/fraud.tpl');
 		$headers = '';
-		$headers .= 'MIME-Version: 1.0'.EMAIL_NEWLINE;
-		$headers .= 'Content-type: text/html; charset=UTF-8'.EMAIL_NEWLINE;
-		$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.EMAIL_NEWLINE;
+		$headers .= 'MIME-Version: 1.0'.PHP_EOL;
+		$headers .= 'Content-type: text/html; charset=UTF-8'.PHP_EOL;
+		$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.PHP_EOL;
 		$data['fraudrecord_score'] = trim($matches['score']);
 		$data['fraudrecord'] = myadmin_stringify($matches, 'json');
 		myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) fraudrecord Output: ".str_replace("\n", '', var_export($matches, TRUE)), __LINE__, __FILE__);
