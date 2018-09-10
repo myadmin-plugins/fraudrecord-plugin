@@ -32,9 +32,11 @@
  * @param $value
  * @return string
  */
-function fraudrecord_hash($value) {
-	for ($i = 0; $i < 32000; $i++)
+function fraudrecord_hash($value)
+{
+	for ($i = 0; $i < 32000; $i++) {
 		$value = sha1('fraudrecord-'.$value);
+	}
 	return $value;
 }
 
@@ -45,7 +47,8 @@ function fraudrecord_hash($value) {
  * @param $text
  * @param $value
  */
-function fraudrecord_report($custid, $module, $type, $text, $value) {
+function fraudrecord_report($custid, $module, $type, $text, $value)
+{
 	//myadmin_log('accounts', 'info', "fraudrecord_report($custid, $module, $type, $text, $value) Called", __LINE__, __FILE__);
 	$module = get_module_name($module);
 	$db = get_module_db($module);
@@ -69,10 +72,12 @@ function fraudrecord_report($custid, $module, $type, $text, $value) {
 		'email' => fraudrecord_hash(strtolower(trim($data['account_lid']))),
 		'ip' => fraudrecord_hash($ip)
 	];
-	if (trim($ip) == '')
+	if (trim($ip) == '') {
 		unset($h['ip']);
-	if (trim($data['name']) == '')
+	}
+	if (trim($data['name']) == '') {
 		unset($h['name']);
+	}
 	$options = [
 		CURLOPT_POST => count($h),
 		CURLOPT_SSL_VERIFYPEER => false
@@ -91,7 +96,8 @@ function fraudrecord_report($custid, $module, $type, $text, $value) {
  * @return bool pretty much always returns true
  * @throws \Exception
  */
-function update_fraudrecord($custid, $module = 'default', $ip = false) {
+function update_fraudrecord($custid, $module = 'default', $ip = false)
+{
 	//myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) Called", __LINE__, __FILE__);
 	$module = get_module_name($module);
 	$db = get_module_db($module);
@@ -107,14 +113,16 @@ function update_fraudrecord($custid, $module = 'default', $ip = false) {
 		'_action' => 'query',
 		'_api' => FRAUDRECORD_API_KEY
 	];
-	if ($ip === false)
+	if ($ip === false) {
 		$h['ip'] = trim(\MyAdmin\Session::get_client_ip());
-	else
+	} else {
 		$h['ip'] = trim($ip);
-	if ($ip != '')
+	}
+	if ($ip != '') {
 		$h['ip'] = fraudrecord_hash($h['ip']);
-	else
+	} else {
 		unset($h['ip']);
+	}
 	if (!isset($data['country']) || trim($data['country']) == '') {
 		$data['country'] = 'US';
 		$new_data['country'] = 'US';
@@ -122,9 +130,11 @@ function update_fraudrecord($custid, $module = 'default', $ip = false) {
 	//$fields = array('address', 'city', 'state', 'zip', 'name', 'country');
 	//$fields = array('name');
 	$fields = [];
-	foreach ($fields as $field)
-		if (isset($data[$field]) && trim($data[$field]) != '')
+	foreach ($fields as $field) {
+		if (isset($data[$field]) && trim($data[$field]) != '') {
 			$h[$field] = fraudrecord_hash(strtolower(str_replace(' ', '', trim($data[$field]))));
+		}
+	}
 	$h['email'] = fraudrecord_hash(strtolower(trim($data['account_lid'])));
 	//myadmin_log('accounts', 'info', "Calling With Arguments: " . str_replace("\n", '', var_export($h, TRUE)), __LINE__, __FILE__);
 	$options = [
@@ -148,7 +158,7 @@ function update_fraudrecord($custid, $module = 'default', $ip = false) {
 		$email = $smarty->fetch('email/admin/fraud.tpl');
 		$new_data['fraudrecord_score'] = trim($matches['score']);
 		$new_data['fraudrecord'] = myadmin_stringify($matches, 'json');
-		myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) fraudrecord Output: ".str_replace("\n", '', var_export($matches, TRUE)), __LINE__, __FILE__);
+		myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) fraudrecord Output: ".str_replace("\n", '', var_export($matches, true)), __LINE__, __FILE__);
 		//myadmin_log('accounts', 'info', "    fraudrecord Score: " . $matches['score'], __LINE__, __FILE__);
 
 		if ($matches['score'] >= FRAUDRECORD_SCORE_LOCK) {
@@ -160,12 +170,13 @@ function update_fraudrecord($custid, $module = 'default', $ip = false) {
 		}
 		if ($matches['score'] > FRAUDRECORD_POSSIBLE_FRAUD_SCORE) {
 			$subject = TITLE.' FraudRecord Possible Fraud';
-			admin_mail($subject, $email, FALSE, FALSE, 'admin/fraud.tpl');
+			admin_mail($subject, $email, false, false, 'admin/fraud.tpl');
 			myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module)  $matches[score] >1.0,   Emailing Possible Fraud", __LINE__, __FILE__);
 		}
 		$GLOBALS['tf']->accounts->update($custid, $new_data);
-	} else
+	} else {
 		myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) got blank response ".$h, __LINE__, __FILE__);
+	}
 	return true;
 }
 
@@ -178,7 +189,8 @@ function update_fraudrecord($custid, $module = 'default', $ip = false) {
  * @throws \Exception
  * @throws \SmartyException
  */
-function update_fraudrecord_noaccount($data) {
+function update_fraudrecord_noaccount($data)
+{
 	//myadmin_log('accounts', 'info', "update_fraudrecord_noaccount Called", __LINE__, __FILE__);
 	$h = [
 		'_action' => 'query',
@@ -192,9 +204,11 @@ function update_fraudrecord_noaccount($data) {
 	//$fields = array('address', 'city', 'state', 'zip', 'name', 'country');
 	//$fields = array('name');
 	$fields = [];
-	foreach ($fields as $field)
-		if (isset($data[$field]) && trim($data[$field]) != '')
+	foreach ($fields as $field) {
+		if (isset($data[$field]) && trim($data[$field]) != '') {
 			$h[$field] = fraudrecord_hash(strtolower(str_replace(' ', '', trim($data[$field]))));
+		}
+	}
 	$h['email'] = fraudrecord_hash(strtolower(trim($data['lid'])));
 	//myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) Calling With Arguments: " . str_replace("\n", '', var_export($h, TRUE)), __LINE__, __FILE__);
 	$options = [
@@ -220,10 +234,11 @@ function update_fraudrecord_noaccount($data) {
 		$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.PHP_EOL;
 		$data['fraudrecord_score'] = trim($matches['score']);
 		$data['fraudrecord'] = myadmin_stringify($matches, 'json');
-		myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) fraudrecord Output: ".str_replace("\n", '', var_export($matches, TRUE)), __LINE__, __FILE__);
+		myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) fraudrecord Output: ".str_replace("\n", '', var_export($matches, true)), __LINE__, __FILE__);
 		//myadmin_log('accounts', 'info', "    fraudrecord Score: " . $matches['score'], __LINE__, __FILE__);
-		if ($matches['score'] >= 10.0)
+		if ($matches['score'] >= 10.0) {
 			$data['status'] = 'locked';
+		}
 	}
 	return $data;
 }
