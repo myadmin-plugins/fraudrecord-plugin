@@ -1,5 +1,5 @@
 {
-	"name": "detain/fraudrecord-plugin",
+	"name": "detain/myadmin-fraudrecord-plugin",
 	"type": "myadmin-plugin",
 	"description": "FraudRecord handling plugin for MyAdmin",
 	"keywords": [
