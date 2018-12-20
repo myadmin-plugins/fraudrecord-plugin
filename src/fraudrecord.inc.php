@@ -52,11 +52,8 @@ function fraudrecord_report($custid, $module, $type, $text, $value)
 	//myadmin_log('accounts', 'info', "fraudrecord_report($custid, $module, $type, $text, $value) Called", __LINE__, __FILE__);
 	$module = get_module_name($module);
 	$db = get_module_db($module);
-	$GLOBALS['tf']->accounts->set_db_module($module);
-	$GLOBALS['tf']->history->set_db_module($module);
 	$data = $GLOBALS['tf']->accounts->read($custid);
 	$lid = $data['account_lid'];
-	$GLOBALS['tf']->accounts->set_db_module('default');
 	$log_custid = $GLOBALS['tf']->accounts->cross_reference($custid);
 	$defaultdb = $GLOBALS['tf']->db;
 	$defaultdb->query("select access_ip from access_log where access_owner='{$log_custid}' limit 1", __LINE__, __FILE__);
@@ -101,8 +98,6 @@ function update_fraudrecord($custid, $module = 'default', $ip = false)
 	//myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) Called", __LINE__, __FILE__);
 	$module = get_module_name($module);
 	$db = get_module_db($module);
-	$GLOBALS['tf']->accounts->set_db_module($module);
-	$GLOBALS['tf']->history->set_db_module($module);
 	$data = $GLOBALS['tf']->accounts->read($custid);
 	$new_data = [];
 	if (isset($data['cc_whitelist']) && $data['cc_whitelist'] == 1) {
