@@ -230,7 +230,7 @@ function update_fraudrecord_noaccount($data)
 		$data['fraudrecord_score'] = trim($matches['score']);
 		$data['fraudrecord'] = myadmin_stringify($matches, 'json');
 		myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) fraudrecord Output: ".str_replace("\n", '', var_export($matches, true)), __LINE__, __FILE__);
-		//myadmin_log('accounts', 'info', "    fraudrecord Score: " . $matches['score'], __LINE__, __FILE__);
+		//myadmin_log('accounts', 'info', "    fraudrecord Score: " . $matches['score'], __LINE__, __FILE__, $module);
 		if ($matches['score'] >= 10.0) {
 			$data['status'] = 'locked';
 		}
