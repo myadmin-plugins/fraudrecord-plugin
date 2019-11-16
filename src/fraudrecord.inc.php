@@ -165,7 +165,7 @@ function update_fraudrecord($custid, $module = 'default', $ip = false)
 		}
 		if ($matches['score'] > FRAUDRECORD_POSSIBLE_FRAUD_SCORE) {
 			$subject = TITLE.' FraudRecord Possible Fraud';
-			(new MyAdmin\Mail())->adminMail($subject, $email, false, 'admin/fraud.tpl');
+			(new \MyAdmin\Mail())->adminMail($subject, $email, false, 'admin/fraud.tpl');
 			myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module)  $matches[score] >1.0,  Emailing Possible Fraud", __LINE__, __FILE__);
 		}
 		$GLOBALS['tf']->accounts->update($custid, $new_data);
