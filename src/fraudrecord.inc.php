@@ -165,8 +165,8 @@ function update_fraudrecord($custid, $module = 'default', $ip = false)
 		}
 		if ($matches['score'] > FRAUDRECORD_POSSIBLE_FRAUD_SCORE) {
 			$subject = TITLE.' FraudRecord Possible Fraud';
-			admin_mail($subject, $email, false, false, 'admin/fraud.tpl');
-			myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module)  $matches[score] >1.0,   Emailing Possible Fraud", __LINE__, __FILE__);
+			(new MyAdmin\Mail())->adminMail($subject, $email, false, 'admin/fraud.tpl');
+			myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module)  $matches[score] >1.0,  Emailing Possible Fraud", __LINE__, __FILE__);
 		}
 		$GLOBALS['tf']->accounts->update($custid, $new_data);
 	} else {
@@ -223,10 +223,6 @@ function update_fraudrecord_noaccount($data)
 		$smarty->assign('account_lid', $GLOBALS['tf']->accounts->cross_reference($custid));
 		$smarty->assign('fraudArray', $matches);
 		$email = $smarty->fetch('email/admin/fraud.tpl');
-		$headers = '';
-		$headers .= 'MIME-Version: 1.0'.PHP_EOL;
-		$headers .= 'Content-type: text/html; charset=UTF-8'.PHP_EOL;
-		$headers .= 'From: '.TITLE.' <'.EMAIL_FROM.'>'.PHP_EOL;
 		$data['fraudrecord_score'] = trim($matches['score']);
 		$data['fraudrecord'] = myadmin_stringify($matches, 'json');
 		myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) fraudrecord Output: ".str_replace("\n", '', var_export($matches, true)), __LINE__, __FILE__);
