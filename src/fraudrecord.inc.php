@@ -34,10 +34,10 @@
  */
 function fraudrecord_hash($value)
 {
-	for ($i = 0; $i < 32000; $i++) {
-		$value = sha1('fraudrecord-'.$value);
-	}
-	return $value;
+    for ($i = 0; $i < 32000; $i++) {
+        $value = sha1('fraudrecord-'.$value);
+    }
+    return $value;
 }
 
 /**
@@ -49,38 +49,38 @@ function fraudrecord_hash($value)
  */
 function fraudrecord_report($custid, $module, $type, $text, $value)
 {
-	//myadmin_log('accounts', 'info', "fraudrecord_report($custid, $module, $type, $text, $value) Called", __LINE__, __FILE__);
-	$module = get_module_name($module);
-	$db = get_module_db($module);
-	$data = $GLOBALS['tf']->accounts->read($custid);
-	$lid = $data['account_lid'];
-	$log_custid = $GLOBALS['tf']->accounts->cross_reference($custid);
-	$defaultdb = $GLOBALS['tf']->db;
-	$defaultdb->query("select access_ip from access_log where access_owner='{$log_custid}' limit 1", __LINE__, __FILE__);
-	$defaultdb->next_record(MYSQL_ASSOC);
-	$ip = $defaultdb->Record['access_ip'];
-	$h = [
-		'_action' => 'report',
-		'_api' => FRAUDRECORD_API_KEY,
-		'_type' => $type,
-		'_text' => $text,
-		'_value' => $value,
-		'name' => fraudrecord_hash(strtolower(str_replace(' ', '', trim($data['name'])))),
-		'email' => fraudrecord_hash(strtolower(trim($data['account_lid']))),
-		'ip' => fraudrecord_hash($ip)
-	];
-	if (trim($ip) == '') {
-		unset($h['ip']);
-	}
-	if (trim($data['name']) == '') {
-		unset($h['name']);
-	}
-	$options = [
-		CURLOPT_POST => count($h),
-		CURLOPT_SSL_VERIFYPEER => false
-	];
-	$h = getcurlpage('https://www.fraudrecord.com/api/', $h, $options);
-	add_output($h);
+    //myadmin_log('accounts', 'info', "fraudrecord_report($custid, $module, $type, $text, $value) Called", __LINE__, __FILE__);
+    $module = get_module_name($module);
+    $db = get_module_db($module);
+    $data = $GLOBALS['tf']->accounts->read($custid);
+    $lid = $data['account_lid'];
+    $log_custid = $GLOBALS['tf']->accounts->cross_reference($custid);
+    $defaultdb = $GLOBALS['tf']->db;
+    $defaultdb->query("select access_ip from access_log where access_owner='{$log_custid}' limit 1", __LINE__, __FILE__);
+    $defaultdb->next_record(MYSQL_ASSOC);
+    $ip = $defaultdb->Record['access_ip'];
+    $h = [
+        '_action' => 'report',
+        '_api' => FRAUDRECORD_API_KEY,
+        '_type' => $type,
+        '_text' => $text,
+        '_value' => $value,
+        'name' => fraudrecord_hash(strtolower(str_replace(' ', '', trim($data['name'])))),
+        'email' => fraudrecord_hash(strtolower(trim($data['account_lid']))),
+        'ip' => fraudrecord_hash($ip)
+    ];
+    if (trim($ip) == '') {
+        unset($h['ip']);
+    }
+    if (trim($data['name']) == '') {
+        unset($h['name']);
+    }
+    $options = [
+        CURLOPT_POST => count($h),
+        CURLOPT_SSL_VERIFYPEER => false
+    ];
+    $h = getcurlpage('https://www.fraudrecord.com/api/', $h, $options);
+    add_output($h);
 }
 
 /**
@@ -95,84 +95,84 @@ function fraudrecord_report($custid, $module, $type, $text, $value)
  */
 function update_fraudrecord($custid, $module = 'default', $ip = false)
 {
-	//myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) Called", __LINE__, __FILE__);
-	$module = get_module_name($module);
-	$db = get_module_db($module);
-	$data = $GLOBALS['tf']->accounts->read($custid);
-	$new_data = [];
-	if (isset($data['cc_whitelist']) && $data['cc_whitelist'] == 1) {
-		myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) Customer is White Listed for CCs, Updating (non destructively) fraudrecord", __LINE__, __FILE__);
-		//return true;
-	}
-	$h = [
-		'_action' => 'query',
-		'_api' => FRAUDRECORD_API_KEY
-	];
-	if ($ip === false) {
-		$h['ip'] = trim(\MyAdmin\Session::get_client_ip());
-	} else {
-		$h['ip'] = trim($ip);
-	}
-	if ($ip != '') {
-		$h['ip'] = fraudrecord_hash($h['ip']);
-	} else {
-		unset($h['ip']);
-	}
-	if (!isset($data['country']) || trim($data['country']) == '') {
-		$data['country'] = 'US';
-		$new_data['country'] = 'US';
-	}
-	//$fields = array('address', 'city', 'state', 'zip', 'name', 'country');
-	//$fields = array('name');
-	$fields = [];
-	foreach ($fields as $field) {
-		if (isset($data[$field]) && trim($data[$field]) != '') {
-			$h[$field] = fraudrecord_hash(strtolower(str_replace(' ', '', trim($data[$field]))));
-		}
-	}
-	$h['email'] = fraudrecord_hash(strtolower(trim($data['account_lid'])));
-	//myadmin_log('accounts', 'info', "Calling With Arguments: " . str_replace("\n", '', var_export($h, TRUE)), __LINE__, __FILE__);
-	$options = [
-		CURLOPT_POST => count($h),
-		CURLOPT_SSL_VERIFYPEER => false
-	];
-	$h = getcurlpage('https://www.fraudrecord.com/api/', $h, $options);
-	// should return like '<report>0-0-0.0-8ef255ff538622eb</report>'
-	if (preg_match('/^\<report\>(?P<score>.*)-(?P<count>.*)-(?P<reliability>.*)-(?P<code>.*)\<\/report\>$/', $h, $matches)) {
-		unset($matches[0]);
-		unset($matches[1]);
-		unset($matches[2]);
-		unset($matches[3]);
-		unset($matches[4]);
-		$smarty = new TFSmarty;
-		$smarty->assign('account_id', $custid);
-		$smarty->assign('account_lid', $GLOBALS['tf']->accounts->cross_reference($custid));
-		$tmatches = $matches;
-		$tmatches['code'] = '<a href="https://www.fraudrecord.com/api/?showreport='.$matches['code'].'">https://www.fraudrecord.com/api/?showreport='.$matches['code'].'</a>';
-		$smarty->assign('fraudArray', $tmatches);
-		$email = $smarty->fetch('email/admin/fraud.tpl');
-		$new_data['fraudrecord_score'] = trim($matches['score']);
-		$new_data['fraudrecord'] = myadmin_stringify($matches, 'json');
-		myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) fraudrecord Output: ".str_replace("\n", '', var_export($matches, true)), __LINE__, __FILE__);
-		//myadmin_log('accounts', 'info', "    fraudrecord Score: " . $matches['score'], __LINE__, __FILE__);
+    //myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) Called", __LINE__, __FILE__);
+    $module = get_module_name($module);
+    $db = get_module_db($module);
+    $data = $GLOBALS['tf']->accounts->read($custid);
+    $new_data = [];
+    if (isset($data['cc_whitelist']) && $data['cc_whitelist'] == 1) {
+        myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) Customer is White Listed for CCs, Updating (non destructively) fraudrecord", __LINE__, __FILE__);
+        //return true;
+    }
+    $h = [
+        '_action' => 'query',
+        '_api' => FRAUDRECORD_API_KEY
+    ];
+    if ($ip === false) {
+        $h['ip'] = trim(\MyAdmin\Session::get_client_ip());
+    } else {
+        $h['ip'] = trim($ip);
+    }
+    if ($ip != '') {
+        $h['ip'] = fraudrecord_hash($h['ip']);
+    } else {
+        unset($h['ip']);
+    }
+    if (!isset($data['country']) || trim($data['country']) == '') {
+        $data['country'] = 'US';
+        $new_data['country'] = 'US';
+    }
+    //$fields = array('address', 'city', 'state', 'zip', 'name', 'country');
+    //$fields = array('name');
+    $fields = [];
+    foreach ($fields as $field) {
+        if (isset($data[$field]) && trim($data[$field]) != '') {
+            $h[$field] = fraudrecord_hash(strtolower(str_replace(' ', '', trim($data[$field]))));
+        }
+    }
+    $h['email'] = fraudrecord_hash(strtolower(trim($data['account_lid'])));
+    //myadmin_log('accounts', 'info', "Calling With Arguments: " . str_replace("\n", '', var_export($h, TRUE)), __LINE__, __FILE__);
+    $options = [
+        CURLOPT_POST => count($h),
+        CURLOPT_SSL_VERIFYPEER => false
+    ];
+    $h = getcurlpage('https://www.fraudrecord.com/api/', $h, $options);
+    // should return like '<report>0-0-0.0-8ef255ff538622eb</report>'
+    if (preg_match('/^\<report\>(?P<score>.*)-(?P<count>.*)-(?P<reliability>.*)-(?P<code>.*)\<\/report\>$/', $h, $matches)) {
+        unset($matches[0]);
+        unset($matches[1]);
+        unset($matches[2]);
+        unset($matches[3]);
+        unset($matches[4]);
+        $smarty = new TFSmarty();
+        $smarty->assign('account_id', $custid);
+        $smarty->assign('account_lid', $GLOBALS['tf']->accounts->cross_reference($custid));
+        $tmatches = $matches;
+        $tmatches['code'] = '<a href="https://www.fraudrecord.com/api/?showreport='.$matches['code'].'">https://www.fraudrecord.com/api/?showreport='.$matches['code'].'</a>';
+        $smarty->assign('fraudArray', $tmatches);
+        $email = $smarty->fetch('email/admin/fraud.tpl');
+        $new_data['fraudrecord_score'] = trim($matches['score']);
+        $new_data['fraudrecord'] = myadmin_stringify($matches, 'json');
+        myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) fraudrecord Output: ".str_replace("\n", '', var_export($matches, true)), __LINE__, __FILE__);
+        //myadmin_log('accounts', 'info', "    fraudrecord Score: " . $matches['score'], __LINE__, __FILE__);
 
-		if ($matches['score'] >= FRAUDRECORD_SCORE_LOCK) {
-			myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) Carder Email Or High Score From Customer {$custid}, Disabling Account", __LINE__, __FILE__);
-			if (!isset($data['cc_whitelist']) || $data['cc_whitelist'] != 1) {
-				function_requirements('disable_account');
-				disable_account($custid, $module);
-			}
-		}
-		if ($matches['score'] > FRAUDRECORD_POSSIBLE_FRAUD_SCORE) {
-			$subject = TITLE.' FraudRecord Possible Fraud';
-			(new \MyAdmin\Mail())->adminMail($subject, $email, false, 'admin/fraud.tpl');
-			myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module)  $matches[score] >1.0,  Emailing Possible Fraud", __LINE__, __FILE__);
-		}
-		$GLOBALS['tf']->accounts->update($custid, $new_data);
-	} else {
-		myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) got blank response ".$h, __LINE__, __FILE__);
-	}
-	return true;
+        if ($matches['score'] >= FRAUDRECORD_SCORE_LOCK) {
+            myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) Carder Email Or High Score From Customer {$custid}, Disabling Account", __LINE__, __FILE__);
+            if (!isset($data['cc_whitelist']) || $data['cc_whitelist'] != 1) {
+                function_requirements('disable_account');
+                disable_account($custid, $module);
+            }
+        }
+        if ($matches['score'] > FRAUDRECORD_POSSIBLE_FRAUD_SCORE) {
+            $subject = TITLE.' FraudRecord Possible Fraud';
+            (new \MyAdmin\Mail())->adminMail($subject, $email, false, 'admin/fraud.tpl');
+            myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module)  $matches[score] >1.0,  Emailing Possible Fraud", __LINE__, __FILE__);
+        }
+        $GLOBALS['tf']->accounts->update($custid, $new_data);
+    } else {
+        myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) got blank response ".$h, __LINE__, __FILE__);
+    }
+    return true;
 }
 
 /**
@@ -186,50 +186,50 @@ function update_fraudrecord($custid, $module = 'default', $ip = false)
  */
 function update_fraudrecord_noaccount($data)
 {
-	//myadmin_log('accounts', 'info', "update_fraudrecord_noaccount Called", __LINE__, __FILE__);
-	$h = [
-		'_action' => 'query',
-		'_api' => FRAUDRECORD_API_KEY
-	];
-	$h['ip'] = fraudrecord_hash(\MyAdmin\Session::get_client_ip());
-	if (!isset($data['country']) || trim($data['country']) == '') {
-		$data['country'] = 'US';
-		$new_data['country'] = 'US';
-	}
-	//$fields = array('address', 'city', 'state', 'zip', 'name', 'country');
-	//$fields = array('name');
-	$fields = [];
-	foreach ($fields as $field) {
-		if (isset($data[$field]) && trim($data[$field]) != '') {
-			$h[$field] = fraudrecord_hash(strtolower(str_replace(' ', '', trim($data[$field]))));
-		}
-	}
-	$h['email'] = fraudrecord_hash(strtolower(trim($data['lid'])));
-	//myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) Calling With Arguments: " . str_replace("\n", '', var_export($h, TRUE)), __LINE__, __FILE__);
-	$options = [
-		CURLOPT_POST => count($h),
-		CURLOPT_SSL_VERIFYPEER => false
-	];
-	$h = getcurlpage('https://www.fraudrecord.com/api/', $h, $options);
-	// should return like '<report>0-0-0.0-8ef255ff538622eb</report>'
-	if (preg_match('/^\<report\>(?P<score>.*)-(?P<count>.*)-(?P<reliability>.*)-(?P<code>.*)\<\/report\>$/', $h, $matches)) {
-		unset($matches[0]);
-		unset($matches[1]);
-		unset($matches[2]);
-		unset($matches[3]);
-		unset($matches[4]);
-		$smarty = new TFSmarty;
-		$smarty->assign('account_id', $custid);
-		$smarty->assign('account_lid', $GLOBALS['tf']->accounts->cross_reference($custid));
-		$smarty->assign('fraudArray', $matches);
-		$email = $smarty->fetch('email/admin/fraud.tpl');
-		$data['fraudrecord_score'] = trim($matches['score']);
-		$data['fraudrecord'] = myadmin_stringify($matches, 'json');
-		myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) fraudrecord Output: ".str_replace("\n", '', var_export($matches, true)), __LINE__, __FILE__);
-		//myadmin_log('accounts', 'info', "    fraudrecord Score: " . $matches['score'], __LINE__, __FILE__, $module);
-		if ($matches['score'] >= 10.0) {
-			$data['status'] = 'locked';
-		}
-	}
-	return $data;
+    //myadmin_log('accounts', 'info', "update_fraudrecord_noaccount Called", __LINE__, __FILE__);
+    $h = [
+        '_action' => 'query',
+        '_api' => FRAUDRECORD_API_KEY
+    ];
+    $h['ip'] = fraudrecord_hash(\MyAdmin\Session::get_client_ip());
+    if (!isset($data['country']) || trim($data['country']) == '') {
+        $data['country'] = 'US';
+        $new_data['country'] = 'US';
+    }
+    //$fields = array('address', 'city', 'state', 'zip', 'name', 'country');
+    //$fields = array('name');
+    $fields = [];
+    foreach ($fields as $field) {
+        if (isset($data[$field]) && trim($data[$field]) != '') {
+            $h[$field] = fraudrecord_hash(strtolower(str_replace(' ', '', trim($data[$field]))));
+        }
+    }
+    $h['email'] = fraudrecord_hash(strtolower(trim($data['lid'])));
+    //myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) Calling With Arguments: " . str_replace("\n", '', var_export($h, TRUE)), __LINE__, __FILE__);
+    $options = [
+        CURLOPT_POST => count($h),
+        CURLOPT_SSL_VERIFYPEER => false
+    ];
+    $h = getcurlpage('https://www.fraudrecord.com/api/', $h, $options);
+    // should return like '<report>0-0-0.0-8ef255ff538622eb</report>'
+    if (preg_match('/^\<report\>(?P<score>.*)-(?P<count>.*)-(?P<reliability>.*)-(?P<code>.*)\<\/report\>$/', $h, $matches)) {
+        unset($matches[0]);
+        unset($matches[1]);
+        unset($matches[2]);
+        unset($matches[3]);
+        unset($matches[4]);
+        $smarty = new TFSmarty();
+        $smarty->assign('account_id', $custid);
+        $smarty->assign('account_lid', $GLOBALS['tf']->accounts->cross_reference($custid));
+        $smarty->assign('fraudArray', $matches);
+        $email = $smarty->fetch('email/admin/fraud.tpl');
+        $data['fraudrecord_score'] = trim($matches['score']);
+        $data['fraudrecord'] = myadmin_stringify($matches, 'json');
+        myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) fraudrecord Output: ".str_replace("\n", '', var_export($matches, true)), __LINE__, __FILE__);
+        //myadmin_log('accounts', 'info', "    fraudrecord Score: " . $matches['score'], __LINE__, __FILE__, $module);
+        if ($matches['score'] >= 10.0) {
+            $data['status'] = 'locked';
+        }
+    }
+    return $data;
 }
