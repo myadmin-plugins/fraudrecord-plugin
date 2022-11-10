@@ -73,7 +73,7 @@ class Plugin
          **/
         $settings = $event->getSubject();
         $settings->add_radio_setting(_('Security & Fraud'), _('FraudRecord Fraud Detection'), 'fraudrecord_enable', _('Enable FraudRecord'), _('Enable FraudRecord'), FRAUDRECORD_ENABLE, [true, false], ['Enabled', 'Disabled']);
-        $settings->add_text_setting(_('Security & Fraud'), _('FraudRecord Fraud Detection'), 'fraudrecord_api_key', _('API Key'), _('API Key'), (defined('FRAUDRECORD_API_KEY') ? FRAUDRECORD_API_KEY : ''));
+        $settings->add_password_setting(_('Security & Fraud'), _('FraudRecord Fraud Detection'), 'fraudrecord_api_key', _('API Key'), _('API Key'), (defined('FRAUDRECORD_API_KEY') ? FRAUDRECORD_API_KEY : ''));
         $settings->add_text_setting(_('Security & Fraud'), _('FraudRecord Fraud Detection'), 'fraudrecord_score_lock', _('Lock if Score > #'), _('Lock if Score > #'), (defined('FRAUDRECORD_SCORE_LOCK') ? FRAUDRECORD_SCORE_LOCK : ''));
         $settings->add_text_setting(_('Security & Fraud'), _('FraudRecord Fraud Detection'), 'fraudrecord_possible_fraud_score', _('Email Possible Fraud Score > #'), _('Email Possible Fraud Score > #'), (defined('FRAUDRECORD_POSSIBLE_FRAUD_SCORE') ? FRAUDRECORD_POSSIBLE_FRAUD_SCORE : ''));
         $settings->add_radio_setting(_('Security & Fraud'), _('FraudRecord Fraud Detection'), 'fraudrecord_reporting', _('Enable FraudRecord Reporting'), _('Enable FraudRecord Reporting'), FRAUDRECORD_REPORTING, [true, false], ['Enabled', 'Disabled']);
