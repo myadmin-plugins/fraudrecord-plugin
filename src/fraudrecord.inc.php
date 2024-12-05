@@ -23,7 +23,7 @@
  * Note this formula is capped at 10. maxEarthArc is defined as 20037 kilometers.
  *
  * @author Joe Huss <detain@interserver.net>
- * @copyright 2019
+ * @copyright 2025
  * @package MyAdmin
  * @category General
  */
