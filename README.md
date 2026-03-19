@@ -1,28 +1,46 @@
-# FraudRecord handling plugin for MyAdmin
+# MyAdmin FraudRecord Plugin
 
-FraudRecord handling plugin for MyAdmin
+[![Tests](https://github.com/detain/myadmin-fraudrecord-plugin/actions/workflows/tests.yml/badge.svg)](https://github.com/detain/myadmin-fraudrecord-plugin/actions/workflows/tests.yml)
+[![Latest Stable Version](https://poser.pugx.org/detain/myadmin-fraudrecord-plugin/version)](https://packagist.org/packages/detain/myadmin-fraudrecord-plugin)
+[![Total Downloads](https://poser.pugx.org/detain/myadmin-fraudrecord-plugin/downloads)](https://packagist.org/packages/detain/myadmin-fraudrecord-plugin)
+[![License](https://poser.pugx.org/detain/myadmin-fraudrecord-plugin/license)](https://packagist.org/packages/detain/myadmin-fraudrecord-plugin)
 
-## Build Status and Code Analysis
+A MyAdmin plugin that integrates with the [FraudRecord](https://www.fraudrecord.com/) API to provide fraud detection and reporting capabilities. It allows hosting providers to query customer data against the FraudRecord database, automatically flag or lock accounts that exceed configurable risk thresholds, and report fraudulent activity back to the FraudRecord community.
 
-Site          | Status
---------------|---------------------------
-![Travis-CI](http://i.is.cc/storage/GYd75qN.png "Travis-CI")     | [![Build Status](https://travis-ci.org/detain/myadmin-fraudrecord-plugin.svg?branch=master)](https://travis-ci.org/detain/myadmin-fraudrecord-plugin)
-![CodeClimate](http://i.is.cc/storage/GYlageh.png "CodeClimate")  | [![Code Climate](https://codeclimate.com/github/detain/myadmin-fraudrecord-plugin/badges/gpa.svg)](https://codeclimate.com/github/detain/myadmin-fraudrecord-plugin) [![Test Coverage](https://codeclimate.com/github/detain/myadmin-fraudrecord-plugin/badges/coverage.svg)](https://codeclimate.com/github/detain/myadmin-fraudrecord-plugin/coverage) [![Issue Count](https://codeclimate.com/github/detain/myadmin-fraudrecord-plugin/badges/issue_count.svg)](https://codeclimate.com/github/detain/myadmin-fraudrecord-plugin)
-![Scrutinizer](http://i.is.cc/storage/GYeUnux.png "Scrutinizer")   | [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/myadmin-plugins/fraudrecord-plugin/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/myadmin-plugins/fraudrecord-plugin/?branch=master) [![Code Coverage](https://scrutinizer-ci.com/g/myadmin-plugins/fraudrecord-plugin/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/myadmin-plugins/fraudrecord-plugin/?branch=master) [![Build Status](https://scrutinizer-ci.com/g/myadmin-plugins/fraudrecord-plugin/badges/build.png?b=master)](https://scrutinizer-ci.com/g/myadmin-plugins/fraudrecord-plugin/build-status/master)
-![Codacy](http://i.is.cc/storage/GYi66Cx.png "Codacy")        | [![Codacy Badge](https://api.codacy.com/project/badge/Grade/226251fc068f4fd5b4b4ef9a40011d06)](https://www.codacy.com/app/detain/myadmin-fraudrecord-plugin) [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/25fa74eb74c947bf969602fcfe87e349)](https://www.codacy.com/app/detain/myadmin-fraudrecord-plugin?utm_source=github.com&utm_medium=referral&utm_content=detain/myadmin-fraudrecord-plugin&utm_campaign=Badge_Coverage)
-![Coveralls](http://i.is.cc/storage/GYjNSim.png "Coveralls")    | [![Coverage Status](https://coveralls.io/repos/github/detain/db_abstraction/badge.svg?branch=master)](https://coveralls.io/github/detain/myadmin-fraudrecord-plugin?branch=master)
-![Packagist](http://i.is.cc/storage/GYacBEX.png "Packagist")     | [![Latest Stable Version](https://poser.pugx.org/detain/myadmin-fraudrecord-plugin/version)](https://packagist.org/packages/detain/myadmin-fraudrecord-plugin) [![Total Downloads](https://poser.pugx.org/detain/myadmin-fraudrecord-plugin/downloads)](https://packagist.org/packages/detain/myadmin-fraudrecord-plugin) [![Latest Unstable Version](https://poser.pugx.org/detain/myadmin-fraudrecord-plugin/v/unstable)](//packagist.org/packages/detain/myadmin-fraudrecord-plugin) [![Monthly Downloads](https://poser.pugx.org/detain/myadmin-fraudrecord-plugin/d/monthly)](https://packagist.org/packages/detain/myadmin-fraudrecord-plugin) [![Daily Downloads](https://poser.pugx.org/detain/myadmin-fraudrecord-plugin/d/daily)](https://packagist.org/packages/detain/myadmin-fraudrecord-plugin) [![License](https://poser.pugx.org/detain/myadmin-fraudrecord-plugin/license)](https://packagist.org/packages/detain/myadmin-fraudrecord-plugin)
+## Features
 
+- Query the FraudRecord API for fraud scores on customer accounts
+- Report fraudulent customers to FraudRecord
+- Configurable score thresholds for automatic account locking
+- Email notifications for possible fraud detections
+- Privacy-preserving hashing of customer data before transmission
+- Integrates with the MyAdmin event/hook system via Symfony EventDispatcher
 
 ## Installation
-
-Install with composer like
 
 ```sh
 composer require detain/myadmin-fraudrecord-plugin
 ```
 
+## Configuration
+
+The plugin registers the following settings under **Security & Fraud > FraudRecord Fraud Detection**:
+
+| Setting | Description |
+|---------|-------------|
+| `fraudrecord_enable` | Enable or disable FraudRecord integration |
+| `fraudrecord_api_key` | Your FraudRecord API key |
+| `fraudrecord_score_lock` | Score threshold above which accounts are automatically locked |
+| `fraudrecord_possible_fraud_score` | Score threshold above which an admin fraud alert email is sent |
+| `fraudrecord_reporting` | Enable or disable reporting of fraud back to FraudRecord |
+
+## Running Tests
+
+```sh
+composer install
+vendor/bin/phpunit
+```
+
 ## License
 
-The FraudRecord handling plugin for MyAdmin class is licensed under the LGPL-v2.1 license.
-
+This package is licensed under the [LGPL-2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html) license.
