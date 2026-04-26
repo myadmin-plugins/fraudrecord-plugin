@@ -52,10 +52,10 @@ function fraudrecord_report($custid, $module, $type, $text, $value)
     //myadmin_log('accounts', 'info', "fraudrecord_report($custid, $module, $type, $text, $value) Called", __LINE__, __FILE__);
     $module = get_module_name($module);
     $db = get_module_db($module);
-    $data = $GLOBALS['tf']->accounts->read($custid);
+    $data = \MyAdmin\App::accounts()->read($custid);
     $lid = $data['account_lid'];
-    $log_custid = $GLOBALS['tf']->accounts->cross_reference($custid);
-    $defaultdb = $GLOBALS['tf']->db;
+    $log_custid = \MyAdmin\App::accounts()->cross_reference($custid);
+    $defaultdb = \MyAdmin\App::db();
     $defaultdb->query("select access_ip from access_log where access_owner='{$log_custid}' limit 1", __LINE__, __FILE__);
     $defaultdb->next_record(MYSQL_ASSOC);
     $ip = $defaultdb->Record['access_ip'];
@@ -98,7 +98,7 @@ function update_fraudrecord($custid, $module = 'default', $ip = false)
     //myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) Called", __LINE__, __FILE__);
     $module = get_module_name($module);
     $db = get_module_db($module);
-    $data = $GLOBALS['tf']->accounts->read($custid);
+    $data = \MyAdmin\App::accounts()->read($custid);
     $new_data = [];
     if (isset($data['cc_whitelist']) && $data['cc_whitelist'] == 1) {
         myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) Customer is White Listed for CCs, Updating (non destructively) fraudrecord", __LINE__, __FILE__);
@@ -146,7 +146,7 @@ function update_fraudrecord($custid, $module = 'default', $ip = false)
         unset($matches[4]);
         $smarty = new TFSmarty();
         $smarty->assign('account_id', $custid);
-        $smarty->assign('account_lid', $GLOBALS['tf']->accounts->cross_reference($custid));
+        $smarty->assign('account_lid', \MyAdmin\App::accounts()->cross_reference($custid));
         $tmatches = $matches;
         $tmatches['code'] = '<a href="https://www.fraudrecord.com/api/?showreport='.$matches['code'].'">https://www.fraudrecord.com/api/?showreport='.$matches['code'].'</a>';
         $smarty->assign('fraudArray', $tmatches);
@@ -168,7 +168,7 @@ function update_fraudrecord($custid, $module = 'default', $ip = false)
             (new \MyAdmin\Mail())->adminMail($subject, $email, false, 'admin/fraud.tpl');
             myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module)  $matches[score] >1.0,  Emailing Possible Fraud", __LINE__, __FILE__);
         }
-        $GLOBALS['tf']->accounts->update($custid, $new_data);
+        \MyAdmin\App::accounts()->update($custid, $new_data);
     } else {
         myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) got blank response ".$h, __LINE__, __FILE__);
     }
@@ -220,7 +220,7 @@ function update_fraudrecord_noaccount($data)
         unset($matches[4]);
         $smarty = new TFSmarty();
         $smarty->assign('account_id', $custid);
-        $smarty->assign('account_lid', $GLOBALS['tf']->accounts->cross_reference($custid));
+        $smarty->assign('account_lid', \MyAdmin\App::accounts()->cross_reference($custid));
         $smarty->assign('fraudArray', $matches);
         $email = $smarty->fetch('email/admin/fraud.tpl');
         $data['fraudrecord_score'] = trim($matches['score']);
