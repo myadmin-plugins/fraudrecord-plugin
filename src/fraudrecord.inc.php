@@ -156,11 +156,22 @@ function update_fraudrecord($custid, $module = 'default', $ip = false)
         myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) fraudrecord Output: ".str_replace("\n", '', var_export($matches, true)), __LINE__, __FILE__);
         //myadmin_log('accounts', 'info', "    fraudrecord Score: " . $matches['score'], __LINE__, __FILE__);
 
+        // A high FraudRecord score used to call disable_account(), which locked the
+        // account, killed its sessions and OAuth tokens, and cancelled every active
+        // service. It now only turns off credit card use, matching update_maxmind() in
+        // the maxmind plugin, so the customer keeps their services and can still pay by
+        // PayPal, crypto or prepay. The 'fraud' disable_cc_reason is sticky: can_use_cc()
+        // and MyAdmin\Billing\CcDisabled both honour it, so adding another card does not
+        // quietly turn credit cards back on — only an admin can lift it.
         if ($matches['score'] >= FRAUDRECORD_SCORE_LOCK) {
-            myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) Carder Email Or High Score From Customer {$custid}, Disabling Account", __LINE__, __FILE__);
             if (!isset($data['cc_whitelist']) || $data['cc_whitelist'] != 1) {
-                function_requirements('disable_account');
-                disable_account($custid, $module);
+                myadmin_log('accounts', 'warning', "update_fraudrecord({$custid}, {$module}) High Score From Customer {$custid} ({$matches['score']} >= ".FRAUDRECORD_SCORE_LOCK.'), Disabling Credit Card Use', __LINE__, __FILE__);
+                $new_data['disable_cc'] = 1;
+                $new_data['disable_cc_reason'] = \MyAdmin\Billing\CcDisabled::REASON_FRAUD;
+                $new_data['cc_auto'] = 0;
+                $new_data['payment_method'] = 'paypal';
+            } else {
+                myadmin_log('accounts', 'notice', "update_fraudrecord({$custid}, {$module}) High Score From Customer {$custid} ({$matches['score']} >= ".FRAUDRECORD_SCORE_LOCK.'), but they are White Listed for CCs', __LINE__, __FILE__);
             }
         }
         if ($matches['score'] > FRAUDRECORD_POSSIBLE_FRAUD_SCORE) {
@@ -227,8 +238,15 @@ function update_fraudrecord_noaccount($data)
         $data['fraudrecord'] = myadmin_stringify($matches, 'json');
         myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) fraudrecord Output: ".str_replace("\n", '', var_export($matches, true)), __LINE__, __FILE__);
         //myadmin_log('accounts', 'info', "    fraudrecord Score: " . $matches['score'], __LINE__, __FILE__, $module);
+        // Matches update_fraudrecord(): a high score disables credit card use rather than
+        // locking the account, so the other payment methods stay available. The 10.0
+        // threshold here predates FRAUDRECORD_SCORE_LOCK and is left as-is so this change
+        // does not move the cut-off.
         if ($matches['score'] >= 10.0) {
-            $data['status'] = 'locked';
+            $data['disable_cc'] = 1;
+            $data['disable_cc_reason'] = \MyAdmin\Billing\CcDisabled::REASON_FRAUD;
+            $data['cc_auto'] = 0;
+            $data['payment_method'] = 'paypal';
         }
     }
     return $data;

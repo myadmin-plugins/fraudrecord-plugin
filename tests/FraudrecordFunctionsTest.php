@@ -342,13 +342,47 @@ class FraudrecordFunctionsTest extends TestCase
     }
 
     /**
-     * Test that update_fraudrecord_noaccount sets status to locked when score >= 10.
+     * Test that update_fraudrecord_noaccount disables credit card use when score >= 10.
+     *
+     * A high score used to set status='locked'. It now turns off credit cards and records
+     * the sticky 'fraud' reason instead, so the customer keeps their account and their
+     * other payment methods.
      */
-    public function testNoaccountLocksAtScoreThreshold(): void
+    public function testNoaccountDisablesCcAtScoreThreshold(): void
     {
-        // Verify source contains the locking logic at score >= 10.0
         $this->assertStringContainsString("\$matches['score'] >= 10.0", self::$sourceContents);
-        $this->assertStringContainsString("\$data['status'] = 'locked'", self::$sourceContents);
+        $this->assertStringContainsString("\$data['disable_cc'] = 1", self::$sourceContents);
+        $this->assertStringContainsString(
+            "\$data['disable_cc_reason'] = \\MyAdmin\\Billing\\CcDisabled::REASON_FRAUD",
+            self::$sourceContents
+        );
+    }
+
+    /**
+     * Test that neither entry point locks the account any more.
+     */
+    public function testHighScoreNoLongerLocksTheAccount(): void
+    {
+        $this->assertStringNotContainsString("\$data['status'] = 'locked'", self::$sourceContents);
+        // Matched as a call, not as any mention — the comment above the rule still names
+        // disable_account() to explain what the code used to do.
+        $this->assertStringNotContainsString("disable_account(\$custid", self::$sourceContents);
+        $this->assertStringNotContainsString("function_requirements('disable_account')", self::$sourceContents);
+    }
+
+    /**
+     * Test that update_fraudrecord records the sticky fraud reason, not just disable_cc.
+     *
+     * Without the reason, add_cc() clears disable_cc the next time the customer adds a
+     * card that looks fine — see MyAdmin\Billing\CcDisabled.
+     */
+    public function testUpdateFraudrecordRecordsStickyFraudReason(): void
+    {
+        $this->assertStringContainsString("\$new_data['disable_cc'] = 1", self::$sourceContents);
+        $this->assertStringContainsString(
+            "\$new_data['disable_cc_reason'] = \\MyAdmin\\Billing\\CcDisabled::REASON_FRAUD",
+            self::$sourceContents
+        );
     }
 
     /**
