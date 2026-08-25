@@ -155,14 +155,6 @@ function update_fraudrecord($custid, $module = 'default', $ip = false)
         $new_data['fraudrecord'] = myadmin_stringify($matches, 'json');
         myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) fraudrecord Output: ".str_replace("\n", '', var_export($matches, true)), __LINE__, __FILE__);
         //myadmin_log('accounts', 'info', "    fraudrecord Score: " . $matches['score'], __LINE__, __FILE__);
-
-        // A high FraudRecord score used to call disable_account(), which locked the
-        // account, killed its sessions and OAuth tokens, and cancelled every active
-        // service. It now only turns off credit card use, matching update_maxmind() in
-        // the maxmind plugin, so the customer keeps their services and can still pay by
-        // PayPal, crypto or prepay. The 'fraud' disable_cc_reason is sticky: can_use_cc()
-        // and MyAdmin\Billing\CcDisabled both honour it, so adding another card does not
-        // quietly turn credit cards back on — only an admin can lift it.
         if ($matches['score'] >= FRAUDRECORD_SCORE_LOCK) {
             if (!isset($data['cc_whitelist']) || $data['cc_whitelist'] != 1) {
                 myadmin_log('accounts', 'warning', "update_fraudrecord({$custid}, {$module}) High Score From Customer {$custid} ({$matches['score']} >= ".FRAUDRECORD_SCORE_LOCK.'), Disabling Credit Card Use', __LINE__, __FILE__);
