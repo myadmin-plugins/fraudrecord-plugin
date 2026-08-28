@@ -79,11 +79,9 @@ description: Implements FraudRecord API queries and reports in `src/fraudrecord.
    if ($matches['score'] >= FRAUDRECORD_SCORE_LOCK) {
        // Do NOT call disable_account() here — that locked the account and cancelled every
        // active service. A high score turns off credit card use only, matching
-       // update_maxmind() in the maxmind plugin. disable_cc_reason records the cause for
-       // the admin page and the client notice; nothing gates on it.
+       // update_maxmind() in the maxmind plugin.
        if (!isset($data['cc_whitelist']) || $data['cc_whitelist'] != 1) {
            $new_data['disable_cc'] = 1;
-           $new_data['disable_cc_reason'] = \MyAdmin\Billing\CcDisabled::REASON_FRAUD;
            $new_data['cc_auto'] = 0;
            $new_data['payment_method'] = 'paypal';
            myadmin_log('accounts', 'warning', "High score, disabling credit card use", __LINE__, __FILE__);

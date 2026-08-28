@@ -156,14 +156,11 @@ function update_fraudrecord($custid, $module = 'default', $ip = false)
         myadmin_log('accounts', 'info', "update_fraudrecord($custid, $module) fraudrecord Output: ".str_replace("\n", '', var_export($matches, true)), __LINE__, __FILE__);
         //myadmin_log('accounts', 'info', "    fraudrecord Score: " . $matches['score'], __LINE__, __FILE__);
         if ($matches['score'] >= FRAUDRECORD_SCORE_LOCK) {
+            myadmin_log('accounts', 'info', "update_fraudrecord({$custid}, {$module}) Carder Email Or High Score From Customer {$custid}, Disabling Credit Card Use", __LINE__, __FILE__);
             if (!isset($data['cc_whitelist']) || $data['cc_whitelist'] != 1) {
-                myadmin_log('accounts', 'warning', "update_fraudrecord({$custid}, {$module}) High Score From Customer {$custid} ({$matches['score']} >= ".FRAUDRECORD_SCORE_LOCK.'), Disabling Credit Card Use', __LINE__, __FILE__);
                 $new_data['disable_cc'] = 1;
-                $new_data['disable_cc_reason'] = \MyAdmin\Billing\CcDisabled::REASON_FRAUD;
                 $new_data['cc_auto'] = 0;
                 $new_data['payment_method'] = 'paypal';
-            } else {
-                myadmin_log('accounts', 'notice', "update_fraudrecord({$custid}, {$module}) High Score From Customer {$custid} ({$matches['score']} >= ".FRAUDRECORD_SCORE_LOCK.'), but they are White Listed for CCs', __LINE__, __FILE__);
             }
         }
         if ($matches['score'] > FRAUDRECORD_POSSIBLE_FRAUD_SCORE) {
@@ -236,7 +233,6 @@ function update_fraudrecord_noaccount($data)
         // does not move the cut-off.
         if ($matches['score'] >= 10.0) {
             $data['disable_cc'] = 1;
-            $data['disable_cc_reason'] = \MyAdmin\Billing\CcDisabled::REASON_FRAUD;
             $data['cc_auto'] = 0;
             $data['payment_method'] = 'paypal';
         }

@@ -345,17 +345,12 @@ class FraudrecordFunctionsTest extends TestCase
      * Test that update_fraudrecord_noaccount disables credit card use when score >= 10.
      *
      * A high score used to set status='locked'. It now turns off credit cards and records
-     * the 'fraud' reason instead, so the customer keeps their account and their other
-     * payment methods.
+     * instead, so the customer keeps their account and their other payment methods.
      */
     public function testNoaccountDisablesCcAtScoreThreshold(): void
     {
         $this->assertStringContainsString("\$matches['score'] >= 10.0", self::$sourceContents);
         $this->assertStringContainsString("\$data['disable_cc'] = 1", self::$sourceContents);
-        $this->assertStringContainsString(
-            "\$data['disable_cc_reason'] = \\MyAdmin\\Billing\\CcDisabled::REASON_FRAUD",
-            self::$sourceContents
-        );
     }
 
     /**
@@ -371,18 +366,11 @@ class FraudrecordFunctionsTest extends TestCase
     }
 
     /**
-     * Test that update_fraudrecord records the fraud reason alongside disable_cc.
-     *
-     * The reason drives the admin customer page and the client-facing notice; it is not
-     * a gate — see MyAdmin\Billing\CcDisabled.
+     * Test that update_fraudrecord disables credit card use on a high score.
      */
-    public function testUpdateFraudrecordRecordsFraudReason(): void
+    public function testUpdateFraudrecordDisablesCc(): void
     {
         $this->assertStringContainsString("\$new_data['disable_cc'] = 1", self::$sourceContents);
-        $this->assertStringContainsString(
-            "\$new_data['disable_cc_reason'] = \\MyAdmin\\Billing\\CcDisabled::REASON_FRAUD",
-            self::$sourceContents
-        );
     }
 
     /**

@@ -49,7 +49,7 @@ $loader->add_page_requirement('fraudrecord_report', /* path to src/fraudrecord.i
 - HTTP POST via `getcurlpage('https://www.fraudrecord.com/api/', $h, $options)` with `CURLOPT_SSL_VERIFYPEER => false`
 - Query action: `'_action' => 'query'` · Report action: `'_action' => 'report'`
 - Response pattern: `<report>SCORE-COUNT-RELIABILITY-CODE</report>` parsed with named captures `(?P<score>.*)`, `(?P<count>.*)`, `(?P<reliability>.*)`, `(?P<code>.*)`
-- CC-disable threshold: `FRAUDRECORD_SCORE_LOCK` constant (named for the account lock it used to trigger; it now disables credit card use via `MyAdmin\Billing\CcDisabled::REASON_FRAUD` and leaves the account active) · Alert threshold: `FRAUDRECORD_POSSIBLE_FRAUD_SCORE` constant
+- CC-disable threshold: `FRAUDRECORD_SCORE_LOCK` constant (named for the account lock it used to trigger; it now disables credit card use and leaves the account active) · Alert threshold: `FRAUDRECORD_POSSIBLE_FRAUD_SCORE` constant
 
 ## Conventions
 
